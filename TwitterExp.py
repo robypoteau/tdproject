@@ -9,7 +9,8 @@ issue = TwitterAPI(consumer_key, consumer_secret, access_token_key, access_token
 
 issue.request('search/tweets', {'q':'Jesus', 'lang':'en', 'count':'10'})
 iteration = issue.get_iterator()
-iteration.keys()
-'''for item in iteration:
-    print item['text'] + item['text'] + '\n' 
-'''
+
+with open('twitterNodes.csv', 'w+') as afile:
+    for item in iteration:
+        afile.write(item['id_str'].encode('utf-8') +','+ item['text'].encode('utf-8') + '\n')
+    
