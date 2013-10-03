@@ -1,0 +1,35 @@
+from TwitterAPI import TwitterAPI
+import time
+
+consumer_key = "7UhYU7wwZZAMQQnwperCUA"
+consumer_secret = "gADPNwkySetoudLGRhYDd6dmHgABbPZjuthX1xM4C6k"
+access_token_secret = "Lk16RRBkhrNZoIuMZ23RVmKAldYSmzGQiYJeIEm4R0"
+access_token_key = "1587711043-x8cU7WbWjPBBXuwykoMgNwnpU6sO76BeBtHh7Aj"
+
+call = TwitterAPI(consumer_key, consumer_secret, access_token_key, access_token_secret)
+
+#Contacts the twitter REST Api and asked for tweets satisfying the following criteria
+call.request('statuses/filter', {'language':'en'})
+response = call.get_iterator()
+
+with open('C:/Users/Roby/Documents/Python/tdproject/twitterNocttdes.csv', 'a') as afile:
+    for item in response:
+        try:
+            if('text' in item):
+                print item[u'status'][u'id_str'].encode('utf-8')
+                print item[u'text'].encode('utf-8')
+                ident = item[u'status'][u'id_str'].encode('utf-8')
+                tweet = item[u'text'].encode('utf-8')
+                tweet = " ".join(tweet.split()) #Removes the excess whitespace from the tweet
+                afile.write(ident +','+ tweet + '\n') #Writes the id and tweet to a file
+            
+            elif('delete' in item):
+                continue
+            elif('disconnect' in item):
+                dismessage =  [item['disconnect']['code'], item['disconnect']['stream_name'], [item['disconnect']['reason']]
+                message = "__".join
+                with open('C:/Users/Roby/Documents/Python/tdproject/disconnect_log.txt', 'a') as logfile:
+                    logfile.write(time.ctime() + " ... " +  message + '\n') #Writes the id and tweet to a file
+                
+        except KeyError as ke:
+            continue
