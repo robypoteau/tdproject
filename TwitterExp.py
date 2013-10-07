@@ -14,21 +14,23 @@ try:
 except :
     print 'Call fail'
     sys.exit()
-    
+
 response = call.get_iterator()
 
-with open('C:/Users/Roby/Documents/Python/tdproject/twitterNodes.csv', 'a') as afile:
+with open('C:/Users/Roby/Documents/Python/tdproject/twitterNodes2.tsv', 'a') as afile:
     for item in response:
         try:
-            #print item[u'id_str'].encode('utf-8')
-            ident = item[u'id_str'].encode('utf-8')
-            tweet = item[u'text'].encode('utf-8')
             lang = item[u'lang'].encode('utf-8')
-            tweet = " ".join(tweet.split()) #Removes the excess whitespace from the tweet
-            afile.write(lang + "," + ident +','+ tweet + '\n') #Writes the id and tweet to a file
-            #sys.exit()
+            if(lang == 'en'):
+                #print item[u'id_str'].encode('utf-8')
+                ident = item[u'id_str'].encode('utf-8')
+                tweet = item[u'text'].encode('utf-8')
+                tweet = " ".join(tweet.split()) #Removes the excess whitespace from the tweet
+                afile.write(lang + "\t" + ident +'\t'+ tweet + '\n') #Writes the id and tweet to a file
         
         except KeyError as ke:
-            print 'Key Fail'
-            #sys.exit()
-            #continue
+            continue
+            
+        except:
+            print "Unexpected error:", sys.exc_info()[0]
+            continue
