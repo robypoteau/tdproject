@@ -19,3 +19,10 @@ for i in range(0,len(twogram)):
     
 freqTable.sort()
 freqTable.reverse()
+
+with open('C:/Users/Roby/Documents/Python/tdproject/frequency_table.txt', 'w') as afile:
+    for i in range(0,len(freqTable)):
+        if(freqTable[i][0] > 1 ):
+            afile.write(str(freqTable[i][0]) + " | "+ " | ".join(freqTable[i][1])+ '\n')
+        else:
+            break
