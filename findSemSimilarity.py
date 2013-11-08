@@ -1,6 +1,23 @@
 import nltk
 #import numpy as np
 from nltk.corpus import wordnet as wn
+wnl = nltk.stem.WordNetLemmatizer()
+
+
+def rmv_contractions(token):
+    if(token == "n't"):
+        token = 'not'
+    elif(token == "'m"):
+        token = "am"
+    elif(token == "'ve"):
+        token = "have"
+    elif(token == "'ll"):
+        token = 'will'
+    elif(token == "'re"):
+        token = 'are'
+    elif(token == "'d"):
+        token = "would"
+    return token
 
 #def sem_similarity(sent1, sent2):
 sent1 = "\xe2\x80\x9c@itsss_ervin: I don't understand how I'm so bad at math and I'm Asian\xe2\x80\x9d \xf0\x9f\x98\x82\xf0\x9f\x98\x82\xf0\x9f\x98\x82\xf0\x9f\x91\x8f\xf0\x9f\x91\x8f\xf0\x9f\x91\x8f\xf0\x9f\x91\x8f\t\t\n"
@@ -11,8 +28,11 @@ sent1 = sent1.decode('ascii', 'ignore').encode('utf-8')
 sent2 = sent2.decode('ascii', 'ignore').encode('utf-8')
 
 #Tokenize text
-sent1 = nltk.word_tokenize(sent1)
-sent2 = nltk.word_tokenize(sent2)
+sent1 = nltk.tokenize.TreebankWordTokenizer().tokenize(sent1.lower())
+sent2 = nltk.tokenize.TreebankWordTokenizer().tokenize(sent2.lower())
+
+#Remove Contractions
+sent1 = [rmv_contractions(token) for token in sent1]
 
 #Stem text
 #porter = nltk.PorterStemmer()
@@ -28,22 +48,82 @@ word_sense1 = []
 word_sense2 = []
 
 for word in sent1:
-    ws = wn.synsets(word[0])
     a = (word[1].lower())[0]
-    for sense in ws:
-        if(sense.pos != a):
-            ws.pop(ws.index(sense))
-    word_sense1.append(ws)
+    if(a == 'n'):
+        ws = wn.synsets(wnl.lemmatize(word[0]), wn.NOUN)
+    elif(a == 'v'):
+        ws = wn.synsets(wnl.lemmatize(word[0]), wn.VERB)
+    elif(a == 'j'):
+        ws = wn.synsets(wnl.lemmatize(word[0]), wn.ADJ)
+    else:
+        ws = wn.synsets(wnl.lemmatize(word[0]))
+    if(ws != []):
+        word_sense1.append(ws)
 
+#Word sense disambiguagtion
 for word in sent2:
-    ws = wn.synsets(word[0])
     a = (word[1].lower())[0]
-    print a
-    for sense in ws:
-        if(sense.pos != a):
-            ws.pop(ws.index(sense))
-    word_sense2.append(ws)
+    if(a == 'n'):
+        ws = wn.synsets(wnl.lemmatize(word[0]), wn.NOUN)
+    elif(a == 'v'):
+        ws = wn.synsets(wnl.lemmatize(word[0]), wn.VERB)
+    elif(a == 'j'):
+        ws = wn.synsets(wnl.lemmatize(word[0]), wn.ADJ)
+    else:
+        ws = wn.synsets(wnl.lemmatize(word[0]))
+    if(ws != []):
+        word_sense2.append(ws)
 
+#gloss matrix
+gloss1 = []
+for word in word_sense1:
+    element = []
+    for synonym in word:
+        defn = synonym.definition
+        
+        hype = synonym.hypernyms()
+        hype = [h.definition for h in hype]
+        hype = " ".join(hype)
+        
+        hypo = synonym.hyponyms()
+        hypo = [h.definition for h in hypo]
+        hypo = " ".join(hypo)
+        
+        element.append([defn, hype, hypo])
+    gloss1.append(element)
+
+gloss2 = []
+for word in word_sense1:
+    element = []
+    for synonym in word:
+        defn = synonym.definition
+        
+        hype = synonym.hypernyms()
+        hype = [h.definition for h in hype]
+        hype = " ".join(hype)
+        
+        hypo = synonym.hyponyms()
+        hypo = [h.definition for h in hypo]
+        hypo = " ".join(hypo)
+        
+        element.append([defn, hype, hypo])
+    gloss2.append(element)
+
+
+end = len(word_sense1)
+for i in range(0,end):    
+    if(i == 0):
+        #Compare first and second word
+        for wa in word_sense1[i]:
+            for wb in word_sense1[i+1]:
+                
+    elif(i == end-1):
+        #Compare last two words
+        
+    else:
+        #Compare middles words
+        
+        
 #Create a similarity matrix
 #sim_mat = np.zeros(len(sent1),len(sent2))
 
