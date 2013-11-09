@@ -3,6 +3,9 @@ import nltk
 from nltk.corpus import wordnet as wn
 wnl = nltk.stem.WordNetLemmatizer()
 
+def compare(list1, list2):
+    list3 = set(list1) & set(list2)
+    return len(list3)
 
 def rmv_contractions(token):
     if(token == "n't"):
@@ -80,7 +83,7 @@ for word in word_sense1:
     element = []
     for synonym in word:
         defn = synonym.definition
-        
+        '''
         hype = synonym.hypernyms()
         hype = [h.definition for h in hype]
         hype = " ".join(hype)
@@ -90,6 +93,8 @@ for word in word_sense1:
         hypo = " ".join(hypo)
         
         element.append([defn, hype, hypo])
+        '''
+        element.append(defn)
     gloss1.append(element)
 
 gloss2 = []
@@ -98,6 +103,7 @@ for word in word_sense1:
     for synonym in word:
         defn = synonym.definition
         
+        '''
         hype = synonym.hypernyms()
         hype = [h.definition for h in hype]
         hype = " ".join(hype)
@@ -106,24 +112,48 @@ for word in word_sense1:
         hypo = [h.definition for h in hypo]
         hypo = " ".join(hypo)
         
-        element.append([defn, hype, hypo])
+        element.append([defn, hype, hypo])'''
+        element.append(defn)
     gloss2.append(element)
+    
 
 
 end = len(word_sense1)
-for i in range(0,end):    
-    if(i == 0):
-        #Compare first and second word
-        for wa in word_sense1[i]:
-            for wb in word_sense1[i+1]:
-                
-    elif(i == end-1):
-        #Compare last two words
-        
-    else:
-        #Compare middles words
-        
-        
+
+if(end > 1):
+    for i in range(0,end):    
+        score = []
+        indices = []
+        j=k=0
+        if(i == 0):
+            #Compare first and second word
+            for wa in gloss1[i]:
+                j+=1
+                print j
+                for wb in gloss1[i+1]:
+                    k+=1
+                    print j, k
+                    score.append(compare(wa[0], wb[0]))
+                    indices.append([j,k])
+    
+        elif(i == end-1):
+            #Compare last two words
+            for wa in gloss1[i-1]:
+                j+=1
+                for wb in gloss1[i]:
+                    k+=1
+                    score.append(compare(wa[0], wb[0]))
+                    indices.append([j,k])
+        else:
+            #Compare middles words
+            for wa in gloss1[i]:
+                j+=1
+                for wb in gloss1[i+1]:
+                    k+=1
+                    score.append(compare(wa[0], wb[0]))
+                    indices.append(j)
+        mx = indices[score.index(max(score))]
+        word_sense1[i] = word_sense1[i][mx]
 #Create a similarity matrix
 #sim_mat = np.zeros(len(sent1),len(sent2))
 
