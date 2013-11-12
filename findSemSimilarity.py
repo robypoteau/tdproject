@@ -76,7 +76,10 @@ def sem_similarity(sent1, sent2):
             ws = wn.synsets(wnl.lemmatize(word[0]))
         if(ws != []):
             word_sense2.append(ws)
-            
+
+    if(word_sense1 == [] or word_sense2 == []):
+        return 0.0
+                
     #gloss matrix
     gloss1 = []
     for word in word_sense1:
@@ -167,7 +170,9 @@ def sem_similarity(sent1, sent2):
         if(len(word_sense1[0]) > 1):
             pick = [-1*len(word.name) for word in word_sense1[0]]
             word_sense1[0] = word_sense1[0][pick.index(max(pick))]
-            
+        else:
+            word_sense1[0] = word_sense1[0][0]
+
     end = len(word_sense2)
     if(end > 1):
         for i in range(0,end):    
@@ -214,7 +219,8 @@ def sem_similarity(sent1, sent2):
         if(len(word_sense2[0]) > 1):
             pick = [-1*len(word.name) for word in word_sense2[0]]
             word_sense2[0] = word_sense2[0][pick.index(max(pick))]
-    
+        else:
+            word_sense2[0] = word_sense2[0][0]
     #Create a similarity matrix
     sim_mat = []
     for word1 in word_sense1:
@@ -231,24 +237,26 @@ def sem_similarity(sent1, sent2):
 
 #Import File
 raw=[]
-N = 10
+N = 100
 EdgeMatrix = np.zeros((N,N))
 thisDir = os.path.dirname(os.path.realpath(__file__))
-with open(os.path.join(thisDir, "twitter_raw.txt")) as afile:
-    for i in range(0,10):
+with open(os.path.join(thisDir, "twitter_raw1.txt")) as afile:
+    for i in range(0,N):
         raw.append(afile.readline())
 
 with open(os.path.join(thisDir, "edges.txt"), 'w') as afile:
-    afile.write(";")
     for i in range(0,N):
-        afile.write("A"+str(i+1)+";")
+        afile.write(";A"+str(i+1))
+        
     for i in range(0,N):
-        for j in range(i,N):
+        afile.write("\nA"+str(i+1))
+        for j in range(0,N):
             if(i != j):
-                EdgeMatrix[i][j] = sem_similarity(raw[i], raw[j])
-                EdgeMatrix[j][i] = EdgeMatrix[i][j]
+                if(i < j):
+                    EdgeMatrix[i][j] = sem_similarity(raw[i], raw[j])
+                    afile.write(";"+str(EdgeMatrix[i][j]))
+                else:
+                    EdgeMatrix[i][j] = EdgeMatrix[j][i]
+                    afile.write(";"+str(EdgeMatrix[j][i]))
             else:
-                EdgeMatrix[i][j] = 0.0
-
-
-    
+                afile.write(';0.0')  
