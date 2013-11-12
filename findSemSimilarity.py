@@ -7,6 +7,9 @@ def compare(list1, list2):
     list3 = set(list1) & set(list2)
     return len(list3)
 
+def scoreall(wa, wb):
+   return compare(wa[0], wb[0]) + compare(wa[0], wb[1]) + compare(wa[0], wb[2]) + compare(wa[1], wb[1]) + compare(wa[1], wb[2])  + compare(wa[2], wb[2])
+
 def rmv_contractions(token):
     if(token == "n't"):
         token = 'not'
@@ -88,7 +91,7 @@ def sem_similarity(sent1, sent2):
             examples = " ".join(synonym.examples)
             defn = synonym.definition + " " + examples
             
-            '''
+            
             hype = synonym.hypernyms()
             hype = [h.definition for h in hype]
             hype = " ".join(hype)
@@ -99,7 +102,7 @@ def sem_similarity(sent1, sent2):
             
             element.append([defn, hype, hypo])
             '''
-            element.append(defn)
+            element.append(defn)'''
         gloss1.append(element)
     
     gloss2 = []
@@ -109,7 +112,7 @@ def sem_similarity(sent1, sent2):
             examples = " ".join(synonym.examples)
             defn = synonym.definition + " " + examples
             
-            '''
+            
             hype = synonym.hypernyms()
             hype = [h.definition for h in hype]
             hype = " ".join(hype)
@@ -118,8 +121,9 @@ def sem_similarity(sent1, sent2):
             hypo = [h.definition for h in hypo]
             hypo = " ".join(hypo)
             
-            element.append([defn, hype, hypo])'''
-            element.append(defn)
+            element.append([defn, hype, hypo])
+            '''
+            element.append(defn)'''
         gloss2.append(element)
     
         
@@ -139,7 +143,7 @@ def sem_similarity(sent1, sent2):
                         k=0
                         for wb in gloss1[i+1]:
                             k+=1
-                            score.append(compare(wa, wb))
+                            score.append(scoreall(wa, wb))
                             indices.append(j)
             
                 elif(i == end-1):
@@ -149,7 +153,7 @@ def sem_similarity(sent1, sent2):
                         k=0
                         for wb in gloss1[i]:
                             k+=1
-                            score.append(compare(wa, wb))
+                            score.append(scoreall(wa, wb))
                             indices.append(k)
                 else:
                     #Compare middles words
@@ -158,7 +162,7 @@ def sem_similarity(sent1, sent2):
                         k=0
                         for wb in gloss1[i+1]:
                             k+=1
-                            score.append(compare(wa, wb))
+                            score.append(scoreall(wa, wb))
                             indices.append(j)
     
                 #return the j index
@@ -188,7 +192,7 @@ def sem_similarity(sent1, sent2):
                         k=0
                         for wb in gloss2[i+1]:
                             k+=1
-                            score.append(compare(wa, wb))
+                            score.append(scoreall(wa, wb))
                             indices.append(j)
             
                 elif(i == end-1):
@@ -198,7 +202,7 @@ def sem_similarity(sent1, sent2):
                         k=0
                         for wb in gloss2[i]:
                             k+=1
-                            score.append(compare(wa, wb))
+                            score.append(scoreall(wa, wb))
                             indices.append(k)
                 else:
                     #Compare middles words
@@ -207,7 +211,7 @@ def sem_similarity(sent1, sent2):
                         k=0
                         for wb in gloss2[i+1]:
                             k+=1
-                            score.append(compare(wa, wb))
+                            score.append(scoreall(wa, wb))
                             indices.append(j)
     
                 #return the j index
@@ -237,14 +241,14 @@ def sem_similarity(sent1, sent2):
 
 #Import File
 raw=[]
-N = 100
+N = 10 #23472
 EdgeMatrix = np.zeros((N,N))
 thisDir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(thisDir, "twitter_raw1.txt")) as afile:
     for i in range(0,N):
         raw.append(afile.readline())
 
-with open(os.path.join(thisDir, "edges.txt"), 'w') as afile:
+with open(os.path.join(thisDir, "edges2.csv"), 'w') as afile:
     for i in range(0,N):
         afile.write(";A"+str(i+1))
         
@@ -254,9 +258,15 @@ with open(os.path.join(thisDir, "edges.txt"), 'w') as afile:
             if(i != j):
                 if(i < j):
                     EdgeMatrix[i][j] = sem_similarity(raw[i], raw[j])
-                    afile.write(";"+str(EdgeMatrix[i][j]))
+                    if(EdgeMatrix[i][j] > .5):
+                        afile.write(";"+str(EdgeMatrix[i][j]))
+                    else:
+                        afile.write(';') 
                 else:
                     EdgeMatrix[i][j] = EdgeMatrix[j][i]
-                    afile.write(";"+str(EdgeMatrix[j][i]))
+                    if(EdgeMatrix[i][j] > .5):
+                        afile.write(";"+str(EdgeMatrix[j][i]))
+                    else:
+                        afile.write(';') 
             else:
-                afile.write(';0.0')  
+                afile.write(';')  
