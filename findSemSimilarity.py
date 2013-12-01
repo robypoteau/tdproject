@@ -1,11 +1,34 @@
-import nltk, os
+import nltk, os, time
 import numpy as np
 from nltk.corpus import wordnet as wn
 wnl = nltk.stem.WordNetLemmatizer()
 
+def lcs(s1, s2):
+    #s1 = "tom is the man tom tom tom"
+    #s2 = "tom is a man"
+    
+    #s1 = s1.split(" ")
+    #s2 = s2.split(" ")
+    
+    l1 = len(s1) + 1
+    l2 = len(s2) + 1
+    
+    C = np.zeros((l1,l2))
+    
+    for w1 in range(1,l1):
+        for w2 in range(1,l2):
+            if(s1[w1-1] == s2[w2-1]):
+                C[w1,w2] = C[w1-1,w2-1] + 1
+            else:
+                C[w1,w2] = max(C[w1,w2-1], C[w1-1,w2])
+    return C[l1-1,l2-1]
+
 def compare(list1, list2):
-    list3 = set(list1) & set(list2)
-    return len(list3)
+    l1 = list1.split(" ")
+    l2 = list2.split(" ")
+    len3 = lcs(l1, l2)
+    list3 = set(l1) & set(l2)
+    return len3*len3 + len(list3) - len3
 
 def scoreall(wa, wb):
    return compare(wa[0], wb[0]) + compare(wa[0], wb[1]) + compare(wa[0], wb[2]) + compare(wa[1], wb[1]) + compare(wa[1], wb[2])  + compare(wa[2], wb[2])
@@ -240,15 +263,17 @@ def sem_similarity(sent1, sent2):
     return 2*sum(sim_mat)/(len(word_sense1)+end)
 
 #Import File
+start_time =  time.time()
 raw=[]
-N = 10 #23472
+N = 11 #23472
+threshold = 0.0
 EdgeMatrix = np.zeros((N,N))
 thisDir = os.path.dirname(os.path.realpath(__file__))
-with open(os.path.join(thisDir, "twitter_raw1.txt")) as afile:
+with open(os.path.join(thisDir, "test.txt")) as afile:
     for i in range(0,N):
         raw.append(afile.readline())
 
-with open(os.path.join(thisDir, "edges2.csv"), 'w') as afile:
+with open(os.path.join(thisDir, "test.csv"), 'a') as afile:
     for i in range(0,N):
         afile.write(";A"+str(i+1))
         
@@ -258,15 +283,16 @@ with open(os.path.join(thisDir, "edges2.csv"), 'w') as afile:
             if(i != j):
                 if(i < j):
                     EdgeMatrix[i][j] = sem_similarity(raw[i], raw[j])
-                    if(EdgeMatrix[i][j] > .5):
+                    if(EdgeMatrix[i][j] > threshold):
                         afile.write(";"+str(EdgeMatrix[i][j]))
                     else:
                         afile.write(';') 
                 else:
                     EdgeMatrix[i][j] = EdgeMatrix[j][i]
-                    if(EdgeMatrix[i][j] > .5):
+                    if(EdgeMatrix[i][j] > threshold):
                         afile.write(";"+str(EdgeMatrix[j][i]))
                     else:
                         afile.write(';') 
             else:
-                afile.write(';')  
+                afile.write(';')
+print  str((time.time() - start_time)/60.) + " minutes"

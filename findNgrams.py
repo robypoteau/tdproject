@@ -2,12 +2,13 @@ import nltk, os
 
 #Import File
 thisDir = os.path.dirname(os.path.realpath(__file__))
-with open(os.path.join(thisDir, "twitter_raw.txt")) as afile:
+with open(os.path.join(thisDir, "forEdges.tsv")) as afile:
     raw = afile.read()
     tokens = nltk.word_tokenize(raw)
 
 #Calculate n-grams
 twotuples = nltk.bigrams(tokens)
+
 #Remove the duplicates from the list
 twogram = list(set(twotuples))
 
